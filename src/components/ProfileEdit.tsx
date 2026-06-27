@@ -29,9 +29,38 @@ export default function ProfileEdit({
   const [github, setGithub] = useState("");
   const [website, setWebsite] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
   const { showToast } = useToast();
 
+  // Load either draft or initialProfile on mount / load
   useEffect(() => {
+    if (isInitialized) return;
+    if (!userId) return;
+
+    const draftKey = `profile_draft_${userId}`;
+    const savedDraft = localStorage.getItem(draftKey);
+
+    if (savedDraft) {
+      try {
+        const draft = JSON.parse(savedDraft);
+        setFirstName(draft.firstName ?? "");
+        setLastName(draft.lastName ?? "");
+        setCohortYear(draft.cohortYear ?? 2025);
+        setCurrentRole(draft.currentRole ?? "");
+        setCompany(draft.company ?? "");
+        setLinkedin(draft.linkedin ?? "");
+        setGithub(draft.github ?? "");
+        setWebsite(draft.website ?? "");
+        setHasDraft(true);
+        setIsInitialized(true);
+        showToast("Restored your unsaved profile draft!", "info");
+        return;
+      } catch (e) {
+        console.error("Error loading profile draft:", e);
+      }
+    }
+
     if (initialProfile) {
       setFirstName(initialProfile.first_name || "");
       setLastName(initialProfile.last_name || "");
@@ -41,8 +70,76 @@ export default function ProfileEdit({
       setLinkedin(initialProfile.linkedin_handle || "");
       setGithub(initialProfile.github_handle || "");
       setWebsite(initialProfile.website_url || "");
+      setIsInitialized(true);
+    } else if (isFirstTimeSetup) {
+      setIsInitialized(true);
     }
-  }, [initialProfile]);
+  }, [initialProfile, userId, isInitialized, isFirstTimeSetup]);
+
+  // Save draft on form input change, but only if it differs from initial profile
+  useEffect(() => {
+    if (!isInitialized || !userId) return;
+
+    const draftKey = `profile_draft_${userId}`;
+    const currentData = {
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      cohortYear: Number(cohortYear),
+      currentRole: currentRole.trim(),
+      company: company.trim(),
+      linkedin: linkedin.trim(),
+      github: github.trim(),
+      website: website.trim(),
+    };
+
+    const isDifferent =
+      !initialProfile ||
+      currentData.firstName !== (initialProfile.first_name || "") ||
+      currentData.lastName !== (initialProfile.last_name || "") ||
+      currentData.cohortYear !== (initialProfile.cohort_year || 2025) ||
+      currentData.currentRole !== (initialProfile.current_role || "") ||
+      currentData.company !== (initialProfile.company || "") ||
+      currentData.linkedin !== (initialProfile.linkedin_handle || "") ||
+      currentData.github !== (initialProfile.github_handle || "") ||
+      currentData.website !== (initialProfile.website_url || "");
+
+    if (isDifferent) {
+      localStorage.setItem(draftKey, JSON.stringify(currentData));
+      setHasDraft(true);
+    } else {
+      localStorage.removeItem(draftKey);
+      setHasDraft(false);
+    }
+  }, [firstName, lastName, cohortYear, currentRole, company, linkedin, github, website, userId, isInitialized, initialProfile]);
+
+  const handleDiscardDraft = () => {
+    if (window.confirm("Are you sure you want to discard your unsaved draft?")) {
+      const draftKey = `profile_draft_${userId}`;
+      localStorage.removeItem(draftKey);
+      setHasDraft(false);
+
+      if (initialProfile) {
+        setFirstName(initialProfile.first_name || "");
+        setLastName(initialProfile.last_name || "");
+        setCohortYear(initialProfile.cohort_year || 2025);
+        setCurrentRole(initialProfile.current_role || "");
+        setCompany(initialProfile.company || "");
+        setLinkedin(initialProfile.linkedin_handle || "");
+        setGithub(initialProfile.github_handle || "");
+        setWebsite(initialProfile.website_url || "");
+      } else {
+        setFirstName("");
+        setLastName("");
+        setCohortYear(2025);
+        setCurrentRole("");
+        setCompany("");
+        setLinkedin("");
+        setGithub("");
+        setWebsite("");
+      }
+      showToast("Unsaved changes discarded.", "info");
+    }
+  };
 
   // Compute initials for live avatar preview
   const getInitials = () => {
@@ -82,6 +179,9 @@ export default function ProfileEdit({
       if (error) {
         showToast(error.message, "error");
       } else {
+        const draftKey = `profile_draft_${userId}`;
+        localStorage.removeItem(draftKey);
+        setHasDraft(false);
         showToast(
           isFirstTimeSetup ? "Profile created! Let's play Bingo!" : "Profile updated successfully!",
           "success"
@@ -305,10 +405,19 @@ export default function ProfileEdit({
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+            {hasDraft && (
+              <button
+                type="button"
+                onClick={handleDiscardDraft}
+                className="px-5 py-3 bg-black/40 hover:bg-rose-500/10 hover:text-rose-400 border border-white/10 text-slate-400 font-display font-bold rounded-xl text-xs sm:text-sm transition-all active:scale-[0.98] cursor-pointer"
+              >
+                Discard Unsaved Draft
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-brand-neon hover:bg-[#8CE825] text-black font-display font-black tracking-wide rounded-xl text-sm shadow-xl border border-brand-neon/40 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center gap-2"
+              className="px-6 py-3 bg-brand-neon hover:bg-[#8CE825] text-black font-display font-black tracking-wide rounded-xl text-xs sm:text-sm shadow-xl border border-brand-neon/40 transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center gap-2"
             >
               {loading ? (
                 <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></span>

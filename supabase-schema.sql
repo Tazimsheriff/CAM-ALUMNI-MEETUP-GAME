@@ -20,6 +20,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Profiles Policies
+DROP POLICY IF EXISTS "Anyone can view profiles." ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile." ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile." ON public.profiles;
+
 CREATE POLICY "Anyone can view profiles." 
     ON public.profiles FOR SELECT 
     USING (true);
@@ -48,6 +52,9 @@ CREATE TABLE IF NOT EXISTS public.boards (
 ALTER TABLE public.boards ENABLE ROW LEVEL SECURITY;
 
 -- Boards Policies
+DROP POLICY IF EXISTS "Users can view their own board." ON public.boards;
+DROP POLICY IF EXISTS "Users can update/insert their own board." ON public.boards;
+
 CREATE POLICY "Users can view their own board." 
     ON public.boards FOR SELECT 
     USING (auth.uid() = user_id);
@@ -72,6 +79,9 @@ CREATE TABLE IF NOT EXISTS public.scores (
 ALTER TABLE public.scores ENABLE ROW LEVEL SECURITY;
 
 -- Scores Policies
+DROP POLICY IF EXISTS "Anyone can view scores." ON public.scores;
+DROP POLICY IF EXISTS "Users can manage their own score." ON public.scores;
+
 CREATE POLICY "Anyone can view scores." 
     ON public.scores FOR SELECT 
     USING (true);
@@ -82,8 +92,20 @@ CREATE POLICY "Users can manage their own score."
     WITH CHECK (auth.uid() = user_id);
 
 
--- Enable Realtime for the scores table
-ALTER PUBLICATION supabase_realtime ADD TABLE public.scores;
+-- Enable Realtime for the scores table safely
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_publication_rel pr
+        JOIN pg_publication p ON p.oid = pr.prpubid
+        JOIN pg_class c ON c.oid = pr.prrelid
+        WHERE p.pubname = 'supabase_realtime' 
+          AND c.relname = 'scores'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.scores;
+    END IF;
+END $$;
 
 -- Trigger to automatically create a profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -100,6 +122,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE OR REPLACE TRIGGER on_auth_user_created
+-- Drop trigger first to avoid conflicts
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
