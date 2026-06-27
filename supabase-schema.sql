@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     first_name TEXT,
     last_name TEXT,
     cohort_year INTEGER CHECK (cohort_year >= 2019 AND cohort_year <= 2025),
-    current_role TEXT,
+    "current_role" TEXT,
     company TEXT,
     email TEXT,
     linkedin_handle TEXT,
