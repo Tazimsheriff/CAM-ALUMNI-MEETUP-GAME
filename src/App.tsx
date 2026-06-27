@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { supabase, isMockClient } from "./supabase";
 import { Profile, Board, Score } from "./types";
 import { ToastProvider, useToast } from "./components/Toast";
@@ -383,6 +384,7 @@ export default function App() {
   return (
     <ToastProvider>
       <AppContent />
+      <Analytics />
     </ToastProvider>
   );
 }
