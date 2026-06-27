@@ -50,17 +50,26 @@ function AppContent() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      setSession(currentSession);
-      if (currentSession) {
-        setLoading(true);
-        fetchUserProfile(currentSession.user.id, currentSession.user.email);
-      } else {
-        setProfile(null);
-        setBoard(null);
-        setScore(null);
-        setProfileSetupRequired(false);
-        setLoading(false);
-      }
+      setSession((prevSession) => {
+        const isSameUser = currentSession?.user?.id === prevSession?.user?.id;
+        
+        if (isSameUser && currentSession) {
+          // If it's the same user, do not show the loading screen or re-fetch profile
+          return currentSession;
+        }
+
+        if (currentSession) {
+          setLoading(true);
+          fetchUserProfile(currentSession.user.id, currentSession.user.email);
+        } else {
+          setProfile(null);
+          setBoard(null);
+          setScore(null);
+          setProfileSetupRequired(false);
+          setLoading(false);
+        }
+        return currentSession;
+      });
     });
 
     return () => {
