@@ -55,7 +55,7 @@ export default function QRScannerModal({
         .catch((err) => {
           console.warn("Camera getUserMedia blocked or unavailable in this iframe environment:", err);
           setCameraError(
-            "Camera access is blocked by browser security inside the preview frame. Click 'Open in New Tab' at the top-right of the preview window to scan using your phone/webcam, or select an attendee from the Simulator dropdown below!"
+            "Camera access is blocked by browser security inside the preview frame. Click 'Open in New Tab' at the top-right of the preview window to scan using your phone/webcam!"
           );
           setScanningActive(false);
         });

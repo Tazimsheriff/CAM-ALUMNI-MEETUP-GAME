@@ -110,7 +110,7 @@ export default function BingoBoard({ userId, profile, onScoreUpdate }: BingoBoar
     };
 
     try {
-      const { data, error } = await supabase.from("boards").upsert(newBoard);
+      const { data, error } = await supabase.from("boards").upsert(newBoard, { onConflict: "user_id" });
       if (error) {
         showToast("Error saving new board: " + error.message, "error");
       } else {
@@ -158,7 +158,7 @@ export default function BingoBoard({ userId, profile, onScoreUpdate }: BingoBoar
           squares: board.squares,
           checked_indices: nextChecked,
           event_name: board.event_name,
-        });
+        }, { onConflict: "user_id" });
 
         if (error) {
           showToast("Error removing square: " + error.message, "error");
@@ -206,7 +206,7 @@ export default function BingoBoard({ userId, profile, onScoreUpdate }: BingoBoar
         squares: board.squares,
         checked_indices: nextChecked,
         event_name: board.event_name,
-      });
+      }, { onConflict: "user_id" });
 
       if (error) {
         showToast("Error saving square connection: " + error.message, "error");
@@ -249,7 +249,7 @@ export default function BingoBoard({ userId, profile, onScoreUpdate }: BingoBoar
 
     // 2. Publish to Supabase
     try {
-      const { error } = await supabase.from("scores").upsert(scoreData);
+      const { error } = await supabase.from("scores").upsert(scoreData, { onConflict: "user_id" });
       if (error) {
         console.error("Failed to update scores database:", error);
       } else {
