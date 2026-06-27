@@ -1,0 +1,6 @@
+{
+  "name": "Networking Bingo",
+  "description": "A full-stack Networking Bingo web app for the CodeSapiens Alumni Meetup.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
