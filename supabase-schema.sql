@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     github_handle TEXT,
     website_url TEXT,
     avatar_initials VARCHAR(4),
+    bio TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -121,6 +122,47 @@ BEGIN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
     END IF;
 END $$;
+
+
+-- 4. Create connections table
+CREATE TABLE IF NOT EXISTS public.connections (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    connected_user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
+    UNIQUE(user_id, connected_user_id)
+);
+
+-- Enable RLS on connections
+ALTER TABLE public.connections ENABLE ROW LEVEL SECURITY;
+
+-- Connections Policies
+DROP POLICY IF EXISTS "Anyone can view connections." ON public.connections;
+DROP POLICY IF EXISTS "Users can insert their own connections." ON public.connections;
+
+CREATE POLICY "Anyone can view connections." 
+    ON public.connections FOR SELECT 
+    USING (true);
+
+CREATE POLICY "Users can insert their own connections." 
+    ON public.connections FOR INSERT 
+    WITH CHECK (auth.uid() = user_id);
+
+-- Enable Realtime for connections safely
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_publication_rel pr
+        JOIN pg_publication p ON p.oid = pr.prpubid
+        JOIN pg_class c ON c.oid = pr.prrelid
+        WHERE p.pubname = 'supabase_realtime' 
+          AND c.relname = 'connections'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.connections;
+    END IF;
+END $$;
+
 
 -- Trigger to automatically create a profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

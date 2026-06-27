@@ -8,6 +8,7 @@ import ProfileCard from "./components/ProfileCard";
 import BingoBoard from "./components/BingoBoard";
 import Leaderboard from "./components/Leaderboard";
 import Badges from "./components/Badges";
+import Connections from "./components/Connections";
 import MemePopup from "./components/MemePopup";
 import {
   Grid,
@@ -22,7 +23,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-type Tab = "board" | "leaderboard" | "badges" | "profile";
+type Tab = "board" | "leaderboard" | "connections" | "badges" | "profile";
 
 function AppContent() {
   const [session, setSession] = useState<any | null>(null);
@@ -247,6 +248,17 @@ function AppContent() {
               Leaderboard
             </button>
             <button
+              onClick={() => setActiveTab("connections")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "connections"
+                  ? "bg-brand-neon text-black shadow-lg shadow-brand-neon/10"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              <HeartHandshake className="w-4 h-4" />
+              Connections
+            </button>
+            <button
               onClick={() => setActiveTab("badges")}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === "badges"
@@ -321,6 +333,10 @@ function AppContent() {
               <Leaderboard currentUserId={session.user.id} />
             )}
 
+            {activeTab === "connections" && (
+              <Connections currentUserId={session.user.id} />
+            )}
+
             {activeTab === "badges" && (
               <Badges score={score} board={board} profile={profile} />
             )}
@@ -361,6 +377,16 @@ function AppContent() {
         >
           <Trophy className="w-5.5 h-5.5" />
           <span className="text-[10px] font-bold">Ranks</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("connections")}
+          className={`flex flex-col items-center justify-center gap-1 w-16 h-full transition-colors ${
+            activeTab === "connections" ? "text-brand-neon" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          <HeartHandshake className="w-5.5 h-5.5" />
+          <span className="text-[10px] font-bold">Network</span>
         </button>
 
         <button

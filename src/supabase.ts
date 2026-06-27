@@ -35,6 +35,9 @@ class MockSupabaseClient {
     if (!localStorage.getItem("cs_bingo_scores")) {
       localStorage.setItem("cs_bingo_scores", JSON.stringify([]));
     }
+    if (!localStorage.getItem("cs_bingo_connections")) {
+      localStorage.setItem("cs_bingo_connections", JSON.stringify([]));
+    }
   }
 
   // Auth helper methods
@@ -100,6 +103,7 @@ class MockSupabaseClient {
         linkedin_handle: "",
         github_handle: "",
         website_url: "",
+        bio: "",
         avatar_initials: email.substring(0, 2).toUpperCase(),
         created_at: new Date().toISOString(),
       };
@@ -149,6 +153,7 @@ class MockSupabaseClient {
           linkedin_handle: "",
           github_handle: "",
           website_url: "",
+          bio: "",
           avatar_initials: email.substring(0, 2).toUpperCase(),
           created_at: new Date().toISOString(),
         };
@@ -211,7 +216,8 @@ class MockSupabaseClient {
         if (fields && fields.includes("profiles")) {
           const profiles = self.getStorageItem("cs_bingo_profiles");
           filtered = filtered.map((item) => {
-            const profile = profiles.find((p) => p.id === item.user_id);
+            const profileId = table === "connections" ? item.connected_user_id : item.user_id;
+            const profile = profiles.find((p) => p.id === profileId);
             return { ...item, profiles: profile || null };
           });
         }
@@ -272,6 +278,8 @@ class MockSupabaseClient {
             index = currentData.findIndex((item) => item.id === rec.id);
           } else if (table === "boards" || table === "scores") {
             index = currentData.findIndex((item) => item.user_id === rec.user_id);
+          } else if (table === "connections") {
+            index = currentData.findIndex((item) => item.user_id === rec.user_id && item.connected_user_id === rec.connected_user_id);
           }
 
           if (index !== -1) {

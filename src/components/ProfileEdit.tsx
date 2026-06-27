@@ -28,6 +28,7 @@ export default function ProfileEdit({
   const [linkedin, setLinkedin] = useState("");
   const [github, setGithub] = useState("");
   const [website, setWebsite] = useState("");
+  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
@@ -52,6 +53,7 @@ export default function ProfileEdit({
         setLinkedin(draft.linkedin ?? "");
         setGithub(draft.github ?? "");
         setWebsite(draft.website ?? "");
+        setBio(draft.bio ?? "");
         setHasDraft(true);
         setIsInitialized(true);
         showToast("Restored your unsaved profile draft!", "info");
@@ -70,6 +72,7 @@ export default function ProfileEdit({
       setLinkedin(initialProfile.linkedin_handle || "");
       setGithub(initialProfile.github_handle || "");
       setWebsite(initialProfile.website_url || "");
+      setBio(initialProfile.bio || "");
       setIsInitialized(true);
     } else if (isFirstTimeSetup) {
       setIsInitialized(true);
@@ -90,6 +93,7 @@ export default function ProfileEdit({
       linkedin: linkedin.trim(),
       github: github.trim(),
       website: website.trim(),
+      bio: bio.trim(),
     };
 
     const isDifferent =
@@ -101,7 +105,8 @@ export default function ProfileEdit({
       currentData.company !== (initialProfile.company || "") ||
       currentData.linkedin !== (initialProfile.linkedin_handle || "") ||
       currentData.github !== (initialProfile.github_handle || "") ||
-      currentData.website !== (initialProfile.website_url || "");
+      currentData.website !== (initialProfile.website_url || "") ||
+      currentData.bio !== (initialProfile.bio || "");
 
     if (isDifferent) {
       localStorage.setItem(draftKey, JSON.stringify(currentData));
@@ -127,6 +132,7 @@ export default function ProfileEdit({
         setLinkedin(initialProfile.linkedin_handle || "");
         setGithub(initialProfile.github_handle || "");
         setWebsite(initialProfile.website_url || "");
+        setBio(initialProfile.bio || "");
       } else {
         setFirstName("");
         setLastName("");
@@ -136,6 +142,7 @@ export default function ProfileEdit({
         setLinkedin("");
         setGithub("");
         setWebsite("");
+        setBio("");
       }
       showToast("Unsaved changes discarded.", "info");
     }
@@ -170,6 +177,7 @@ export default function ProfileEdit({
       linkedin_handle: linkedin.trim(),
       github_handle: github.trim(),
       website_url: website.trim(),
+      bio: bio.trim(),
       avatar_initials: getInitials(),
     };
 
@@ -339,6 +347,25 @@ export default function ProfileEdit({
                   className="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-white/10 text-white rounded-xl focus:outline-none focus:border-brand-neon focus:ring-1 focus:ring-brand-neon/20 transition-all text-sm font-medium"
                 />
               </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5 font-mono">
+              Short Bio / Status / Fun Fact
+            </label>
+            <div className="relative">
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Tell us about yourself! E.g., 'Compiling coffee into code', 'Passionate about React & Go', 'Seeking cool dev opportunities!'"
+                rows={3}
+                maxLength={200}
+                className="w-full px-4 py-2.5 bg-black/40 border border-white/10 text-white rounded-xl focus:outline-none focus:border-brand-neon focus:ring-1 focus:ring-brand-neon/20 transition-all text-sm font-medium resize-none"
+              />
+              <span className="absolute bottom-2 right-3 text-[10px] text-slate-500 font-mono">
+                {bio.length}/200
+              </span>
             </div>
           </div>
 

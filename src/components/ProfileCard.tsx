@@ -52,7 +52,12 @@ export default function ProfileCard({ profile, score }: ProfileCardProps) {
           <h3 className="text-xl font-display font-bold text-white leading-tight">
             {first_name || "CodeSapiens"} {last_name || "Alumni"}
           </h3>
-          <p className="text-sm font-semibold text-slate-300 mt-1.5 flex items-center gap-1.5">
+          {profile.bio && (
+            <p className="text-xs text-slate-400 mt-2 bg-black/20 p-2.5 rounded-lg border border-white/5 leading-relaxed italic">
+              "{profile.bio}"
+            </p>
+          )}
+          <p className="text-sm font-semibold text-slate-300 mt-2.5 flex items-center gap-1.5">
             <Briefcase className="w-4 h-4 text-slate-400 shrink-0" />
             {current_role ? (
               <span>

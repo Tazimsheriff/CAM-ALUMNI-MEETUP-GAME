@@ -10,6 +10,7 @@ export interface Profile {
   github_handle: string;
   website_url: string;
   avatar_initials: string;
+  bio?: string;
   created_at: string;
 }
 

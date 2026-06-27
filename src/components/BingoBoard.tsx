@@ -211,6 +211,12 @@ export default function BingoBoard({ userId, profile, onScoreUpdate }: BingoBoar
       if (error) {
         showToast("Error saving square connection: " + error.message, "error");
       } else {
+        // Also log the connection in the connections table
+        await supabase.from("connections").upsert({
+          user_id: userId,
+          connected_user_id: scannedProfile.id,
+        }, { onConflict: "user_id,connected_user_id" });
+
         await calculateAndPublishScore(nextChecked, updatedBoard);
         showToast(`Connected with ${scannedProfile.first_name}! Square marked successfully!`, "success");
         
