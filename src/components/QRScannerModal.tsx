@@ -6,12 +6,7 @@ import {
   X,
   Camera,
   QrCode,
-  AlertCircle,
-  Check,
-  Search,
-  Sparkles,
-  RefreshCw,
-  Award
+  Check
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -31,35 +26,12 @@ export default function QRScannerModal({
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [scanningActive, setScanningActive] = useState(false);
-  const [alumniList, setAlumniList] = useState<Profile[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSimAlum, setSelectedSimAlum] = useState<string>("");
   const [successScan, setSuccessScan] = useState<Profile | null>(null);
   const [isDecoding, setIsDecoding] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const requestRef = useRef<number | null>(null);
-
-  // Fetch registered alumni for the simulator
-  useEffect(() => {
-    if (isOpen) {
-      const fetchAlumni = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .order("first_name", { ascending: true });
-          if (data) {
-            setAlumniList(data as Profile[]);
-          }
-        } catch (err) {
-          console.error("Error fetching alumni:", err);
-        }
-      };
-      fetchAlumni();
-    }
-  }, [isOpen]);
 
   // Handle Camera initialization and QR scanning loop
   useEffect(() => {
@@ -198,32 +170,14 @@ export default function QRScannerModal({
     }
   };
 
-  const handleSimulateScan = () => {
-    if (!selectedSimAlum) return;
-    const found = alumniList.find((p) => p.id === selectedSimAlum);
-    if (found) {
-      handleLookupAndSuccess(found.id);
-    }
-  };
-
   const handleCloseReset = () => {
     stopCamera();
     setSuccessScan(null);
     setCameraError(null);
-    setSelectedSimAlum("");
-    setSearchQuery("");
     onClose();
   };
 
   if (!isOpen) return null;
-
-  const filteredAlumni = alumniList.filter((p) => {
-    const fullName = `${p.first_name} ${p.last_name}`.toLowerCase();
-    const company = (p.company || "").toLowerCase();
-    const role = (p.current_role || "").toLowerCase();
-    const search = searchQuery.toLowerCase();
-    return fullName.includes(search) || company.includes(search) || role.includes(search);
-  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
@@ -315,60 +269,6 @@ export default function QRScannerModal({
                 <p className="text-xs max-w-xs font-medium leading-relaxed">{cameraError}</p>
               </div>
             )}
-          </div>
-
-          {/* Simulator Panel (The backup option that is highly interactive) */}
-          <div className="border-t border-white/5 pt-5 space-y-4">
-            <div className="flex items-center gap-2 text-slate-300">
-              <Sparkles className="w-4 h-4 text-brand-neon" />
-              <span className="text-xs font-display font-bold uppercase tracking-wider">Meetup QR Simulator</span>
-            </div>
-            
-            <p className="text-[11px] text-slate-400 leading-normal">
-              No secondary device or webcam? No problem! Use this simulator to search and select the alumnus you met to log your connection:
-            </p>
-
-            <div className="space-y-3">
-              {/* Search input inside simulator */}
-              <div className="relative font-sans">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
-                  <Search className="w-4 h-4" />
-                </span>
-                <input
-                  type="text"
-                  placeholder="Filter attendees by name, role, or college..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-black/30 border border-white/5 rounded-xl text-xs text-white focus:outline-none focus:border-brand-neon focus:ring-1 focus:ring-brand-neon/10"
-                />
-              </div>
-
-              {/* Selector */}
-              <div className="flex gap-2">
-                <select
-                  value={selectedSimAlum}
-                  onChange={(e) => setSelectedSimAlum(e.target.value)}
-                  className="flex-1 px-3 py-2 bg-black/40 border border-white/10 text-white text-xs rounded-xl focus:outline-none focus:border-brand-neon"
-                >
-                  <option value="">-- Choose Attendee --</option>
-                  {filteredAlumni.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.first_name} {p.last_name} ({p.company || "Alum"})
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="button"
-                  onClick={handleSimulateScan}
-                  disabled={!selectedSimAlum}
-                  className="px-4 py-2 bg-brand-neon hover:bg-[#8CE825] text-black font-display font-black text-xs uppercase tracking-wider rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer flex items-center gap-1.5"
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                  Scan
-                </button>
-              </div>
-            </div>
           </div>
 
         </div>

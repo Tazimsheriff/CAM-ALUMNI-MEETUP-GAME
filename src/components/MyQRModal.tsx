@@ -17,30 +17,13 @@ const MOCK_NAMES = [
 ];
 
 export default function MyQRModal({ isOpen, onClose, profile }: MyQRModalProps) {
+  // No automatic trigger or simulate button
   useEffect(() => {
-    if (!isOpen) return;
-
-    // Auto-trigger a surprise "someone scanned your QR" after 7 seconds
-    const timer = setTimeout(() => {
-      triggerMockScan();
-    }, 7000);
-
-    return () => clearTimeout(timer);
+    // Disabled simulation trigger on tab change/mount to keep interaction purely manual or standard scanner-based.
   }, [isOpen]);
 
   const triggerMockScan = () => {
-    const randomName = MOCK_NAMES[Math.floor(Math.random() * MOCK_NAMES.length)];
-    const randomSquare = BINGO_SQUARES[Math.floor(Math.random() * BINGO_SQUARES.length)];
-    window.dispatchEvent(
-      new CustomEvent("trigger-meme", {
-        detail: {
-          type: "scanned_by_others",
-          otherName: randomName,
-          squareText: randomSquare,
-        },
-      })
-    );
-    onClose(); // Close the QR modal so the meme popup takes precedence
+    // No-op or keep for type safety if referenced, though unused.
   };
 
   if (!isOpen) return null;
@@ -108,16 +91,7 @@ export default function MyQRModal({ isOpen, onClose, profile }: MyQRModalProps) 
           Show this QR code to other alumni you connect with! They can tap any matching square on their board to scan this code and log the connection.
         </p>
 
-        {/* Simulator Button */}
-        <div className="mt-4 pt-3 border-t border-white/5">
-          <button
-            onClick={triggerMockScan}
-            className="w-full py-2.5 px-4 rounded-xl bg-white/5 hover:bg-brand-neon/10 border border-white/10 hover:border-brand-neon/30 text-slate-300 hover:text-brand-neon font-display font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer"
-          >
-            <Smartphone className="w-4 h-4" />
-            Simulate Scan Me 📱
-          </button>
-        </div>
+
       </motion.div>
     </div>
   );

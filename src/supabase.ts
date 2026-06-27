@@ -61,11 +61,17 @@ class MockSupabaseClient {
   }
 
   private triggerRealtimeUpdate(table: string) {
-    // Notify score realtime channels
-    if (table === "scores") {
-      const callbacks = this.realtimeCallbacks["scores-channel"] || [];
-      callbacks.forEach((cb) => cb({ event: "UPDATE" }));
-    }
+    // Notify all active channels that have registered callbacks
+    Object.keys(this.realtimeCallbacks).forEach((channelName) => {
+      const callbacks = this.realtimeCallbacks[channelName] || [];
+      callbacks.forEach((cb) => {
+        try {
+          cb({ event: "UPDATE", schema: "public", table });
+        } catch (e) {
+          console.error("Error executing mock realtime callback:", e);
+        }
+      });
+    });
   }
 
   public auth = {
@@ -294,33 +300,27 @@ class MockSupabaseClient {
     return queryBuilder;
   }
 
-  // Realtime subscription mocks
+  // Realtime subscription mocks with chaining support
   public channel(name: string) {
     const self = this;
-    return {
+    const channelBuilder = {
       on: (event: string, filter: any, callback: (payload: any) => void) => {
         if (!self.realtimeCallbacks[name]) {
           self.realtimeCallbacks[name] = [];
         }
         self.realtimeCallbacks[name].push(callback);
-        return {
-          subscribe: () => {
-            return {
-              unsubscribe: () => {
-                self.realtimeCallbacks[name] = (self.realtimeCallbacks[name] || []).filter(
-                  (cb) => cb !== callback
-                );
-              },
-            };
-          },
-        };
+        return channelBuilder; // chainable
       },
       subscribe: () => {
         return {
-          unsubscribe: () => {},
+          unsubscribe: () => {
+            // Keep unsubscribe clean or remove callbacks for this channel
+            self.realtimeCallbacks[name] = [];
+          },
         };
       },
     };
+    return channelBuilder;
   }
 }
 

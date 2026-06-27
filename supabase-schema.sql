@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
     first_name TEXT,
     last_name TEXT,
-    cohort_year INTEGER CHECK (cohort_year >= 2019 AND cohort_year <= 2030),
+    cohort_year INTEGER,
     "current_role" TEXT,
     company TEXT,
     email TEXT,
@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     avatar_initials VARCHAR(4),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Ensure the check constraint is updated to 2030 for existing databases
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_cohort_year_check;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_cohort_year_check CHECK (cohort_year >= 2019 AND cohort_year <= 2030);
 
 -- Enable RLS on profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
@@ -92,7 +96,7 @@ CREATE POLICY "Users can manage their own score."
     WITH CHECK (auth.uid() = user_id);
 
 
--- Enable Realtime for the scores table safely
+-- Enable Realtime for the scores and profiles tables safely
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -104,6 +108,17 @@ BEGIN
           AND c.relname = 'scores'
     ) THEN
         ALTER PUBLICATION supabase_realtime ADD TABLE public.scores;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1 
+        FROM pg_publication_rel pr
+        JOIN pg_publication p ON p.oid = pr.prpubid
+        JOIN pg_class c ON c.oid = pr.prrelid
+        WHERE p.pubname = 'supabase_realtime' 
+          AND c.relname = 'profiles'
+    ) THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
     END IF;
 END $$;
 

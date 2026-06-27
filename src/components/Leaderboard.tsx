@@ -20,9 +20,9 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
   useEffect(() => {
     fetchScores();
 
-    // Subscribe to live scores changes
+    // Subscribe to live scores and profiles changes
     const channel = supabase
-      .channel("scores-channel")
+      .channel("leaderboard-channel")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "scores" },
@@ -30,11 +30,20 @@ export default function Leaderboard({ currentUserId }: LeaderboardProps) {
           fetchScores(false); // Silent reload to keep it live and smooth
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "profiles" },
+        () => {
+          fetchScores(false); // Silent reload to keep it live and smooth
+        }
+      )
       .subscribe();
 
     return () => {
-      supabase.removeChannel?.(channel);
-      channel.unsubscribe?.();
+      if (channel) {
+        supabase.removeChannel?.(channel);
+        channel.unsubscribe?.();
+      }
     };
   }, [cohortFilter]);
 

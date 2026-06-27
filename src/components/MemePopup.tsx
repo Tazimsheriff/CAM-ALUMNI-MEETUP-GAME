@@ -38,10 +38,26 @@ const GIPHY_MEMES = {
   rajini_walk: "1sizYfJpjOrVtPZLxE",         // Rajini style walk
   vijay_trisha: "M9lPXpEEzOwJZPowwJ",        // Vijay & Trisha TVK style
   funny_face: "sQl99b6fPevWVmxJDG",          // Comedy funny face
+
+  // NEWEST ADDITIONS FROM THE USER
+  achaa: "https://i.ibb.co/233j2mmc/achaa.webp",
+  malak_valak: "l2IFtgckanCwiVtBef",
+  tamil_movie_meme: "3S7dHcfGYlxvqjtHqn",
+  funny_tamil_template: "u6WA0TFt0O1KAbaJ88",
+  rajini_style: "1REaFimDo7SbmlyW0A",
+  shocked: "D1wDNDYdAOBVnH1im3",
+  watermelon_drdiwakar: "kw7prTZfSkqzEFUXIp",
+  ajith_thala: "sH5Ye88rMq7MMxqVRs",
+  seeman_trisha: "MBuyww6RR6s6DBQ9wM",
+  nalenale: "bPHvhXrAmYEzt8uzcs",
+  man_sad_funny: "vfYnXZabo2subue7G1",
+  dulquer: "91kSZhdwrfZxVczOxZ",
+  amala_kandupidichutane: "90X2oHBxti3QnzSDd6",
 };
 
 // Function to generate the direct Giphy source URL
 function getGiphyUrl(id: string): string {
+  if (id.startsWith("http")) return id;
   // We use the direct media domain by default which works fantastic in img tags
   return `https://media.giphy.com/media/${id}/giphy.gif`;
 }
@@ -65,6 +81,51 @@ const FALLBACK_MEMES: Meme[] = [
     emoji: "🔥",
     imageUrl: getGiphyUrl(GIPHY_MEMES.pushpa_raj),
     color: "border-emerald-500 shadow-emerald-500/20"
+  },
+  {
+    id: "fallback_achaa",
+    title: "Achaa Achaa!",
+    caption: "When the connection request actually succeeds on the first try.",
+    subcaption: "Achaa... nalla connect aachu!",
+    emoji: "👌",
+    imageUrl: getGiphyUrl(GIPHY_MEMES.achaa),
+    color: "border-sky-400 shadow-sky-400/20"
+  },
+  {
+    id: "fallback_malak_valak",
+    title: "The Ultimate Pitch",
+    caption: "Trying to explain your startup idea in 30 seconds at a networking meetup.",
+    subcaption: "Bro: *speaks high level gibberish confidently*",
+    emoji: "🗣️",
+    imageUrl: getGiphyUrl(GIPHY_MEMES.malak_valak),
+    color: "border-purple-500 shadow-purple-500/20"
+  },
+  {
+    id: "fallback_thala",
+    title: "God Bless You!",
+    caption: "Senior blessing your code changes before merging to production.",
+    subcaption: "Thala: God bless you machaa, direct live deploy panni vidu!",
+    emoji: "👑",
+    imageUrl: getGiphyUrl(GIPHY_MEMES.ajith_thala),
+    color: "border-yellow-400 shadow-yellow-400/20"
+  },
+  {
+    id: "fallback_kandupidichutane",
+    title: "Kandupidichutane!",
+    caption: "When you finally locate that one buggy line hidden in a 1000-line package.",
+    subcaption: "Me: Oh my god! Kandupidichutane!",
+    emoji: "💡",
+    imageUrl: getGiphyUrl(GIPHY_MEMES.amala_kandupidichutane),
+    color: "border-teal-400 shadow-teal-400/20"
+  },
+  {
+    id: "fallback_dulquer",
+    title: "Swag Connection",
+    caption: "Walking into the meetup after completing 3 full bingo columns.",
+    subcaption: "Aesthetic vibes are completely active.",
+    emoji: "🕶️",
+    imageUrl: getGiphyUrl(GIPHY_MEMES.dulquer),
+    color: "border-indigo-400 shadow-indigo-400/20"
   }
 ];
 
