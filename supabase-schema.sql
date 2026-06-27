@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
     first_name TEXT,
     last_name TEXT,
-    cohort_year INTEGER CHECK (cohort_year >= 2019 AND cohort_year <= 2025),
+    cohort_year INTEGER CHECK (cohort_year >= 2019 AND cohort_year <= 2030),
     "current_role" TEXT,
     company TEXT,
     email TEXT,
@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- Profiles Policies
-CREATE POLICY "Users can view their own profile." 
+CREATE POLICY "Anyone can view profiles." 
     ON public.profiles FOR SELECT 
-    USING (auth.uid() = id);
+    USING (true);
 
 CREATE POLICY "Users can update their own profile." 
     ON public.profiles FOR UPDATE 

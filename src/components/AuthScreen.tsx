@@ -9,7 +9,7 @@ interface AuthScreenProps {
   onAuthSuccess: () => void;
 }
 
-type AuthMode = "signin" | "signup" | "magiclink";
+type AuthMode = "signin" | "signup";
 
 export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
   const [mode, setMode] = useState<AuthMode>("signin");
@@ -48,18 +48,6 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
         } else {
           showToast("Successfully signed in!", "success");
           onAuthSuccess();
-        }
-      } else if (mode === "magiclink") {
-        const { data, error } = await supabase.auth.signInWithOtp({ email });
-        if (error) {
-          showToast(error.message, "error");
-        } else {
-          if (isMockClient) {
-            showToast("Magic Link Mode: Signed in instantly for preview!", "success");
-            onAuthSuccess();
-          } else {
-            showToast("Magic Link link sent! Check your inbox.", "success");
-          }
         }
       }
     } catch (err: any) {
@@ -115,16 +103,6 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
           >
             Register
           </button>
-          <button
-            onClick={() => setMode("magiclink")}
-            className={`flex-1 text-center py-2.5 text-xs font-display font-bold uppercase tracking-wider border-b-2 transition-all ${
-              mode === "magiclink"
-                ? "border-brand-neon text-brand-neon"
-                : "border-transparent text-slate-400 hover:text-white"
-            }`}
-          >
-            Magic Link
-          </button>
         </div>
 
         {/* Auth Form */}
@@ -148,31 +126,29 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
             </div>
           </div>
 
-          {mode !== "magiclink" && (
-            <div>
-              <label className="block text-[10px] font-display font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
-                  <KeyRound className="w-4 h-4" />
-                </span>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-white/10 text-white placeholder-slate-500 rounded-xl focus:outline-none focus:border-brand-neon focus:ring-1 focus:ring-brand-neon/20 transition-all text-sm font-medium"
-                />
-              </div>
-              {mode === "signin" && (
-                <p className="text-right text-[11px] text-brand-neon hover:underline cursor-pointer mt-2 font-medium">
-                  Forgot your password?
-                </p>
-              )}
+          <div>
+            <label className="block text-[10px] font-display font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+              Password
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+                <KeyRound className="w-4 h-4" />
+              </span>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full pl-10 pr-4 py-2.5 bg-black/40 border border-white/10 text-white placeholder-slate-500 rounded-xl focus:outline-none focus:border-brand-neon focus:ring-1 focus:ring-brand-neon/20 transition-all text-sm font-medium"
+              />
             </div>
-          )}
+            {mode === "signin" && (
+              <p className="text-right text-[11px] text-brand-neon hover:underline cursor-pointer mt-2 font-medium">
+                Forgot your password?
+              </p>
+            )}
+          </div>
 
           <button
             type="submit"
@@ -183,7 +159,7 @@ export default function AuthScreen({ onAuthSuccess }: AuthScreenProps) {
               <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             ) : (
               <>
-                {mode === "signin" ? "Enter Meetup" : mode === "signup" ? "Join Community" : "Send Magic Link"}
+                {mode === "signin" ? "Enter Meetup" : "Join Community"}
                 <ArrowRight className="w-4 h-4 text-brand-neon" />
               </>
             )}

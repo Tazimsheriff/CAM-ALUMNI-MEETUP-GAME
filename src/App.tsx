@@ -52,6 +52,7 @@ function AppContent() {
     } = supabase.auth.onAuthStateChange((event, currentSession) => {
       setSession(currentSession);
       if (currentSession) {
+        setLoading(true);
         fetchUserProfile(currentSession.user.id, currentSession.user.email);
       } else {
         setProfile(null);
@@ -160,7 +161,7 @@ function AppContent() {
 
   // If not logged in, show Auth Screen
   if (!session) {
-    return <AuthScreen onAuthSuccess={() => setLoading(true)} />;
+    return <AuthScreen onAuthSuccess={() => {}} />;
   }
 
   // If profile setup is required, block app and force setup
